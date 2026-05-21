@@ -1,0 +1,47 @@
+server:
+  port: 8081
+
+
+spring:
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/microservices
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+
+  application:
+    name: userservice
+
+  config:
+    import: optional:configserver:http://localhost:8086
+
+resilience4j:
+  retry:
+    instances:
+      ratingClient:
+        maxAttempts: 3
+        waitDuration: 2s
+
+  circuitbreaker:
+    instances:
+      ratingClient:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 6s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+  ratelimiter:
+    instances :
+      userRateLimiter :
+        limitRefreshPeriod : 5s
+        limitForPeriod : 2
+        timeoutDuration : 2s
